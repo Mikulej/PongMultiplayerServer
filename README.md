@@ -6,7 +6,6 @@
 
 
 TO DO:
-change path for images to res
-change path for shaders to src/shaders
+
 
 Server - Client

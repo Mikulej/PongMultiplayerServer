@@ -9,6 +9,8 @@ const unsigned int SCR_HEIGHT = 600;
 
 int main()
 {
+    //netowrking: connect to server
+    
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
@@ -42,8 +44,7 @@ int main()
 
     // build and compile our shader zprogram
     // ------------------------------------
-    std::cout << "Path is " << std::filesystem::current_path() << std::endl;
-    Shader ourShader("vs.glsl", "fs.glsl");
+    Shader ourShader("shader/vs.glsl", "shader/fs.glsl");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -101,7 +102,7 @@ int main()
     
     stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
     
-    unsigned char *data = stbi_load("box.png", &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load("../res/box.png", &width, &height, &nrChannels, 0);
     if (data)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
