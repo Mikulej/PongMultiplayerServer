@@ -1,11 +1,12 @@
-# Pong Multiplayer
-1. Connect to server via ip and port
-2. Check if both players are ready to start
-3. Draw game screen using OpenGL, update vertices data
-4. When game ends it will restart in 5 second unless someone disconnects
+# Pong Multiplayer Server
+1. Host a game
+2. Listen to client on sockets
 
 
-TO DO:
 
 
-Server - Client
+STEPS:
+1. Create two threads and listen to two ports from there
+2. Send player input data to the main 3rd thread
+3. Simulate the game
+4. Send player input data from network threads to the main thread

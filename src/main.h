@@ -11,7 +11,8 @@
 
 #include <filesystem>
 #include "shader.h"
-
+#include "Socket.h"
+#include <thread>
 #include <iostream>
 
 #endif 
