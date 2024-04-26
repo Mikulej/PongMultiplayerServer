@@ -3,11 +3,12 @@
 int main(){
     //create a socket and listen
     Socket::Initialize();
-    Socket socket1(55555);
+    Socket socket1(66670);
     socket1.Bind("127.0.0.1");
     socket1.Listen();
     socket1.Accept();
     printf("Thats all!");
+    std::cout << socket1.Receive() << std::endl;
     //if there is a connection host a game
     return 0;
 }
