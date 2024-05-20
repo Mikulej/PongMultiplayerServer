@@ -1,7 +1,6 @@
 #include "Socket.h"
 
-WSADATA Socket::wsaData;
-int Socket::wsaerr;
+
 void Socket::Initialize(){
     WORD wVersionRequested = MAKEWORD(2,2);
     wsaerr = WSAStartup(wVersionRequested, &wsaData);
@@ -15,6 +14,7 @@ void Socket::Initialize(){
 
 }
 Socket::Socket(int port):port(port){
+    Initialize();
     serverSocket = INVALID_SOCKET;
     serverSocket = socket(AF_INET,SOCK_STREAM,IPPROTO_TCP);
     if(serverSocket==INVALID_SOCKET){

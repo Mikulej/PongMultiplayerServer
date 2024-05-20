@@ -1,17 +1,54 @@
 #include "main.h"
-
-int main(){
-    //create a socket and listen
-    Socket::Initialize();
-    Socket socket1(66670);
-    socket1.Bind("127.0.0.1");
-    socket1.Listen();
-    socket1.Accept();
-    printf("Thats all!");
-    std::cout << socket1.Receive() << std::endl;
-    //if there is a connection host a game
+constexpr int serverPort1 = 66671;
+constexpr int serverPort2 = 66672;
+constexpr char* serverIp = "127.0.0.1";
+static bool clientReady1 = false, clientReady2 = false;
+std::unique_ptr<Socket> EstableClientConnection(int clientID){
+    int serverPort = 0;
+    if(clientID==1){
+        serverPort = serverPort1;
+    }
+    else{
+        serverPort = serverPort2;
+    }
+    std::unique_ptr<Socket> clientSocket = std::make_unique<Socket>(serverPort);
+    clientSocket->Bind(serverIp);
+    std::cout << "Listening for " << clientID << std::endl;
+    clientSocket->Listen();
+    clientSocket->Accept();
+    std::cout << "Client " << clientID << " accepted" << std::endl;
+    if(clientID==1){
+        clientReady1 = true;
+    }
+    else{
+        clientReady2 = true;
+    }
+    while(true){
+        std::cout << clientSocket->Receive() << std::endl;//code stops until it receives a message or client disconnects
+    }
+    return clientSocket;
+}
+unsigned int handleInput(){
     return 0;
 }
+int main(){
+
+    //Estable connection
+    // std::unique_ptr<Socket> clientSocket1 = EstableClientConnection(1); 
+    // std::unique_ptr<Socket> clientSocket2 = EstableClientConnection(2); 
+    std::thread threadClient1(EstableClientConnection,1);
+    std::thread threadClient2(EstableClientConnection,2);
+    
+    while(!(clientReady1 && clientReady2)){
+        //wait until both clients conntect to the server
+    }
+    //Start a game, use threadClient1 and threadClient2 to receive input
+
+    threadClient1.join(); //stop main thread until t1 finishes its work
+    threadClient2.join();
+    return 0;
+}
+
 // void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 // void processInput(GLFWwindow *window);
 
