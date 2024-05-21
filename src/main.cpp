@@ -3,6 +3,7 @@ constexpr int serverPort1 = 66671;
 constexpr int serverPort2 = 66672;
 constexpr char* serverIp = "127.0.0.1";
 static bool clientReady1 = false, clientReady2 = false;
+static int clientDirection1 = 5, clientDirection2 = 5; //8 = UP, 5 = NEUTRAL, 2 = DOWN
 std::unique_ptr<Socket> EstableClientConnection(int clientID){
     int serverPort = 0;
     if(clientID==1){
@@ -23,246 +24,204 @@ std::unique_ptr<Socket> EstableClientConnection(int clientID){
     else{
         clientReady2 = true;
     }
+    std::string receivedStr;
     while(true){
-        std::cout << clientSocket->Receive() << std::endl;//code stops until it receives a message or client disconnects
+        receivedStr = clientSocket->Receive();
+        receivedStr.c_str();
+        //std::cout << receivedStr << std::endl;
+        clientDirection1 = receivedStr.c_str()[0] - '0';
+        std::cout << clientDirection1 << std::endl;
     }
     return clientSocket;
 }
-unsigned int handleInput(){
-    return 0;
-}
-int main(){
 
-    //Estable connection
-    // std::unique_ptr<Socket> clientSocket1 = EstableClientConnection(1); 
-    // std::unique_ptr<Socket> clientSocket2 = EstableClientConnection(2); 
-    std::thread threadClient1(EstableClientConnection,1);
-    std::thread threadClient2(EstableClientConnection,2);
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+void processInput(GLFWwindow *window);
+inline void processReceivedData(void);
+
+// settings
+int SCR_WIDTH = 1600;
+int SCR_HEIGHT = 900;
+float deltaTime = 0.0f; // Time between current frame and last frame
+float lastFrame = 0.0f; // Time of last frame
+
+int main()
+{
+    //networking: connect to server
     
-    while(!(clientReady1 && clientReady2)){
-        //wait until both clients conntect to the server
+    // glfw: initialize and configure
+    // ------------------------------
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    srand((unsigned)time(NULL));
+
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
+    // glfw window creation
+    // --------------------
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Pong Multiplayer Server", NULL, NULL);
+    if (window == NULL)
+    {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return -1;
     }
+    glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+    // glad: load all OpenGL function pointers
+    // ---------------------------------------
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        std::cout << "Failed to initialize GLAD" << std::endl;
+        return -1;
+    }
+
+    // build and compile our shader zprogram
+    // ------------------------------------
+    Shader ourShader("shader/vs.glsl", "shader/fs.glsl");
+
+    glfwSwapInterval(1);
+   
+    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
+    // -------------------------------------------------------------------------------------------
+    ourShader.use(); // don't forget to activate/use the shader before setting uniforms!
+    // either set it manually like so:
+
+    Sprite::Initialize();
+    // Sprite::Add("box",0.3,0.3,0);
+    // Sprite::get(0).setColor(glm::vec4(1,0,0,1));
+    Collider::Initialize();
+    std::thread threadClient1(EstableClientConnection,1);
+    //std::thread threadClient2(EstableClientConnection,2);
+    while(!clientReady1){
+
+    }
+    
+    // while(!(clientReady1 && clientReady2)){
+    //     //wait until both clients conntect to the server
+    // }
     //Start a game, use threadClient1 and threadClient2 to receive input
 
+
+    
+
+    // Sprite::get(idplayer1).setScale(0.5,2.5);
+    // int idplayer2 = Sprite::Add("box",-0.8f,0,0);
+    // Sprite::get(idplayer2).setScale(0.5,2.5);
+    // render loop
+    // -----------
+    while (!glfwWindowShouldClose(window))
+    {
+        // input
+        // -----
+        glfwGetWindowSize(window, &SCR_WIDTH, &SCR_HEIGHT);
+        processInput(window);
+        processReceivedData();
+
+        // render
+        // ------
+       
+        glClearColor(0, 0, 0, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        Sprite::RenderAll(ourShader);
+        // render container
+
+
+        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+        // -------------------------------------------------------------------------------
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+
+    // optional: de-allocate all resources once they've outlived their purpose:
+    // ------------------------------------------------------------------------
+    Sprite::DeleteTextures();
     threadClient1.join(); //stop main thread until t1 finishes its work
-    threadClient2.join();
+    //threadClient2.join();
+    // glfw: terminate, clearing all previously allocated GLFW resources.
+    // ------------------------------------------------------------------
+    glfwTerminate();
     return 0;
 }
+inline void processReceivedData(){
+    switch (clientDirection1)
+    {
+        case 8:
+        {
+            Sprite::get(0).addPos(0,1.0f*deltaTime);
+            break;
+        }
+        case 2:
+        {
+            Sprite::get(0).addPos(0,-1.0f*deltaTime);
+            break;
+        }
+    }
+    switch (clientDirection2)
+    {
+        case 8:
+        {
+            Sprite::get(1).addPos(0,1.0f*deltaTime);
+            break;
+        }
+        case 2:
+        {
+            Sprite::get(1).addPos(0,-1.0f*deltaTime);
+            break;
+        }
+    }
+}
+// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
+// ---------------------------------------------------------------------------------------------------------
+void processInput(GLFWwindow *window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        glfwSetWindowShouldClose(window, true);
 
-// void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-// void processInput(GLFWwindow *window);
+    float currentFrame = glfwGetTime();
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
 
-// // settings
-// const unsigned int SCR_WIDTH = 800;
-// const unsigned int SCR_HEIGHT = 600;
+    // bool neutralInput = true;
+    // if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+    //     //send message
+    //     s.Send("Q");
+    // //     std::thread networkThread([&s](){
+    // //         s.Send("Hej!");
+    // //     });
+    // }
+    // if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+    //     Sprite::get(0).addPos(0,1.0f*deltaTime);
+    //     neutralInput = false;
+    //     s.Send("W");
+    // }
+    // if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+    //     Sprite::get(0).addPos(0,-1.0f*deltaTime);
+    //     neutralInput = false;
+    //     s.Send("S");
+    // }
+    // if(neutralInput){
+    //     s.Send("N");
+    // }
+    // if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+    //     Sprite::get(1).addPos(0,-1.0f*deltaTime);
+    // }
+    // if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+    //     Sprite::get(1).addPos(0,1.0f*deltaTime);
+    // }
+}
 
-// int main()
-// {
-//     //netowrking: connect to server
-    
-//     // glfw: initialize and configure
-//     // ------------------------------
-//     glfwInit();
-//     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-//     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-//     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-// #ifdef __APPLE__
-//     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-// #endif
-
-//     // glfw window creation
-//     // --------------------
-//     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
-//     if (window == NULL)
-//     {
-//         std::cout << "Failed to create GLFW window" << std::endl;
-//         glfwTerminate();
-//         return -1;
-//     }
-//     glfwMakeContextCurrent(window);
-//     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
-//     // glad: load all OpenGL function pointers
-//     // ---------------------------------------
-//     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-//     {
-//         std::cout << "Failed to initialize GLAD" << std::endl;
-//         return -1;
-//     }
-
-//     // build and compile our shader zprogram
-//     // ------------------------------------
-//     Shader ourShader("shader/vs.glsl", "shader/fs.glsl");
-
-//     // set up vertex data (and buffer(s)) and configure vertex attributes
-//     // ------------------------------------------------------------------
-//     float vertices[] = {
-//         // positions          // colors           // texture coords
-//          0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-//          0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-//         -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-//         -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
-//     };
-//     unsigned int indices[] = {
-//         0, 1, 3, // first triangle
-//         1, 2, 3  // second triangle
-//     };
-//     unsigned int VBO, VAO, EBO;
-//     glGenVertexArrays(1, &VAO);
-//     glGenBuffers(1, &VBO);
-//     glGenBuffers(1, &EBO);
-
-//     glBindVertexArray(VAO);
-
-//     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-//     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-//     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-//     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-//     // position attribute
-//     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-//     glEnableVertexAttribArray(0);
-//     // color attribute
-//     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-//     glEnableVertexAttribArray(1);
-//     // texture coord attribute
-//     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-//     glEnableVertexAttribArray(2);
-
-    
-//     // load and create a texture 
-//     // -------------------------
-//     unsigned int texture1;
-//     int width, height, nrChannels;
-    
-//     // texture 1
-//     // ---------
-//     glGenTextures(1, &texture1);
-//     glBindTexture(GL_TEXTURE_2D, texture1); 
-//      // set the texture wrapping parameters
-//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-//     // set texture filtering parameters
-//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//     // load image, create texture and generate mipmaps
-    
-//     stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-    
-//     unsigned char *data = stbi_load("../res/box.png", &width, &height, &nrChannels, 0);
-//     if (data)
-//     {
-//         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-//         glGenerateMipmap(GL_TEXTURE_2D);
-//     }
-//     else
-//     {
-//         std::cout << "Failed to load texture" << std::endl;
-//     }
-//     stbi_image_free(data);
-    
-//    /*
-//     // texture 2
-//     // ---------
-//     glGenTextures(1, &texture1);
-//     glBindTexture(GL_TEXTURE_2D, texture1);
-//     // set the texture wrapping parameters
-//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-//     // set texture filtering parameters
-//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//     // load image, create texture and generate mipmaps
-//     data = stbi_load("box.png", &width, &height, &nrChannels, 0);
-//     if (data)
-//     {
-//         // note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
-//         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-//         glGenerateMipmap(GL_TEXTURE_2D);
-//     }
-//     else
-//     {
-//         std::cout << "Failed to load texture" << std::endl;
-//     }
-//     stbi_image_free(data);
-//     */
-    
-
-//     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-//     // -------------------------------------------------------------------------------------------
-//     ourShader.use(); // don't forget to activate/use the shader before setting uniforms!
-//     // either set it manually like so:
-
-//     //get uniform locations
-//     static unsigned int transLoc = glGetUniformLocation(ourShader.ID, "transform");//vs
-//     static unsigned int colorLoc = glGetUniformLocation(ourShader.ID, "ourColor");//fs
-//     static unsigned int texZoomLoc = glGetUniformLocation(ourShader.ID, "texZoom");//vs
-//     static unsigned int texOffsetLoc = glGetUniformLocation(ourShader.ID, "texOffset");//vs
-
-//     auto trans = glm::mat4(1.0f);
-//     glUniformMatrix4fv(transLoc, 1, GL_FALSE, glm::value_ptr(trans));
-//     glUniform4f(colorLoc, 0.04f, 0.25f, 0.55f, 1.0f);
-//     glUniform2f(texZoomLoc, 1.0f, 1.0f);
-//     glUniform2f(texOffsetLoc, 0.0f, 0.0f);
-
-//     glBindVertexArray(VAO);
-
-//     glActiveTexture(GL_TEXTURE0);
-//     glBindTexture(GL_TEXTURE_2D, texture1);
-//     // or set it via the texture class
-
-//     // render loop
-//     // -----------
-//     while (!glfwWindowShouldClose(window))
-//     {
-//         // input
-//         // -----
-//         processInput(window);
-
-//         // render
-//         // ------
-//         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-//         glClear(GL_COLOR_BUFFER_BIT);
-
-
-//         // render container
-//         ourShader.use();
-//         glBindVertexArray(VAO);
-//         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-//         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-//         // -------------------------------------------------------------------------------
-//         glfwSwapBuffers(window);
-//         glfwPollEvents();
-//     }
-
-//     // optional: de-allocate all resources once they've outlived their purpose:
-//     // ------------------------------------------------------------------------
-//     glDeleteVertexArrays(1, &VAO);
-//     glDeleteBuffers(1, &VBO);
-//     glDeleteBuffers(1, &EBO);
-
-//     // glfw: terminate, clearing all previously allocated GLFW resources.
-//     // ------------------------------------------------------------------
-//     glfwTerminate();
-//     return 0;
-// }
-
-// // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
-// // ---------------------------------------------------------------------------------------------------------
-// void processInput(GLFWwindow *window)
-// {
-//     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-//         glfwSetWindowShouldClose(window, true);
-// }
-
-// // glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// // ---------------------------------------------------------------------------------------------
-// void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-// {
-//     // make sure the viewport matches the new window dimensions; note that width and 
-//     // height will be significantly larger than specified on retina displays.
-//     glViewport(0, 0, width, height);
-// }
+// glfw: whenever the window size changed (by OS or user resize) this callback function executes
+// ---------------------------------------------------------------------------------------------
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    // make sure the viewport matches the new window dimensions; note that width and 
+    // height will be significantly larger than specified on retina displays.
+    glViewport(0, 0, width, height);
+}
