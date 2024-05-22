@@ -4,7 +4,7 @@ constexpr int serverPort2 = 66672;
 constexpr char* serverIp = "127.0.0.1";
 static bool clientReady1 = false, clientReady2 = false;
 static int clientDirection1 = 5, clientDirection2 = 5; //8 = UP, 5 = NEUTRAL, 2 = DOWN
-std::unique_ptr<Socket> EstableClientConnection(int clientID){
+void EstableClientConnection(int clientID,std::shared_ptr<Socket> clientSocket){
     int serverPort = 0;
     if(clientID==1){
         serverPort = serverPort1;
@@ -12,7 +12,6 @@ std::unique_ptr<Socket> EstableClientConnection(int clientID){
     else{
         serverPort = serverPort2;
     }
-    std::unique_ptr<Socket> clientSocket = std::make_unique<Socket>(serverPort);
     clientSocket->Bind(serverIp);
     std::cout << "Listening for " << clientID << std::endl;
     clientSocket->Listen();
@@ -28,17 +27,17 @@ std::unique_ptr<Socket> EstableClientConnection(int clientID){
     while(true){
         receivedStr = clientSocket->Receive();
         receivedStr.c_str();
-        //std::cout << receivedStr << std::endl;
         clientDirection1 = receivedStr.c_str()[0] - '0';
         std::cout << clientDirection1 << std::endl;
     }
-    return clientSocket;
+    return;
 }
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 inline void processReceivedData(void);
+inline void sendData(std::shared_ptr<Socket> clientSocket1,std::shared_ptr<Socket> clientSocket2);
 
 // settings
 int SCR_WIDTH = 1600;
@@ -47,9 +46,7 @@ float deltaTime = 0.0f; // Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
 int main()
-{
-    //networking: connect to server
-    
+{   
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
@@ -82,22 +79,18 @@ int main()
         return -1;
     }
 
-    // build and compile our shader zprogram
-    // ------------------------------------
     Shader ourShader("shader/vs.glsl", "shader/fs.glsl");
-
     glfwSwapInterval(1);
-   
-    // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
-    // -------------------------------------------------------------------------------------------
-    ourShader.use(); // don't forget to activate/use the shader before setting uniforms!
-    // either set it manually like so:
-
+    ourShader.use(); 
+    
     Sprite::Initialize();
     // Sprite::Add("box",0.3,0.3,0);
     // Sprite::get(0).setColor(glm::vec4(1,0,0,1));
     Collider::Initialize();
-    std::thread threadClient1(EstableClientConnection,1);
+
+    //NETWORK
+    std::shared_ptr<Socket> clientSocket1 = std::make_shared<Socket>(serverPort1);
+    std::thread threadClient1(EstableClientConnection,1,clientSocket1);
     //std::thread threadClient2(EstableClientConnection,2);
     while(!clientReady1){
 
@@ -123,6 +116,7 @@ int main()
         glfwGetWindowSize(window, &SCR_WIDTH, &SCR_HEIGHT);
         processInput(window);
         processReceivedData();
+        sendData(clientSocket1,clientSocket1);
 
         // render
         // ------
@@ -175,6 +169,13 @@ inline void processReceivedData(){
             Sprite::get(1).addPos(0,-1.0f*deltaTime);
             break;
         }
+    }
+}
+inline void sendData(std::shared_ptr<Socket> clientSocket1,std::shared_ptr<Socket> clientSocket2){
+    while(true){
+        clientSocket1->Send("10 10 10");
+        //clientSocket2->Send("20 20 20");
+
     }
 }
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
