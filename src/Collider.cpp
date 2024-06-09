@@ -1,9 +1,11 @@
 #include "Collider.h"
 using namespace std;
 std::vector<Collider> Collider::colliderList;
-Collider::Collider(float x,float y,float width,float height):x(x),y(y),width(width),height(height){
+Collider::Collider(float x,float y,float scaleX,float scaleY):x(x),y(y){
     img_id = Sprite::Add("box",x,y);
-    Sprite::get(img_id).setScale(width,height);
+    Sprite::get(img_id).setScale(scaleX,scaleY);
+    width = Sprite::get(img_id).getScaleX() / 16.0f;
+    height = Sprite::get(img_id).getScaleY() / 9.0f;
 }
 void Collider::Initialize(){
     //add all elements to colliderlist here
@@ -14,7 +16,18 @@ void Collider::Initialize(){
 }
 bool Collider::Collision(){
     for (vector<Collider>::iterator i1 = colliderList.begin(), finish = colliderList.end(); i1 != finish; i1++){
+        i1->UpdatePos();
+        //check if collides with window border
+            if(i1->y + (i1->height/2.0f) >= 1.0){
+                std::cout << "Touching top border!" << std::endl;
+                
+            }
+            if(i1->y - (i1->height/2.0f) <= -1.0){
+                std::cout << "Touching bottom border!" << std::endl;
+                
+            }
         for (vector<Collider>::iterator i2 = colliderList.begin(), finish = colliderList.end(); i2 != finish; i2++){
+            
             //check collision between i1 and i2
 
             // // collision x-axis?
@@ -27,4 +40,8 @@ bool Collider::Collision(){
             // return collisionX && collisionY;
         }
     }
+}
+void Collider::UpdatePos(){
+    x = Sprite::get(img_id).getPosX();
+    y = Sprite::get(img_id).getPosY();    
 }

@@ -116,7 +116,8 @@ int main()
         glfwGetWindowSize(window, &SCR_WIDTH, &SCR_HEIGHT);
         processInput(window);
         processReceivedData();
-        sendData(clientSocket1,clientSocket1);
+        Collider::Collision();
+        //sendData(clientSocket1,clientSocket1);
 
         // render
         // ------
