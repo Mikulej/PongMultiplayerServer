@@ -149,12 +149,16 @@ inline void processReceivedData(){
     {
         case 8:
         {
-            Sprite::get(0).addPos(0,1.0f*deltaTime);
+            Collider::setDirectionAt(0,1.0f,1);
             break;
         }
         case 2:
         {
-            Sprite::get(0).addPos(0,-1.0f*deltaTime);
+            Collider::setDirectionAt(0,-1.0f,1);
+            break;
+        }
+        default:{
+            Collider::setDirectionAt(0.0f,0.0f,1);
             break;
         }
     }
@@ -162,12 +166,16 @@ inline void processReceivedData(){
     {
         case 8:
         {
-            Sprite::get(1).addPos(0,1.0f*deltaTime);
+            Collider::setDirectionAt(0,1.0f,2);
             break;
         }
         case 2:
         {
-            Sprite::get(1).addPos(0,-1.0f*deltaTime);
+            Collider::setDirectionAt(0,-1.0f,2);
+            break;
+        }
+        default:{
+            Collider::setDirectionAt(0.0f,0.0f,2);
             break;
         }
     }
