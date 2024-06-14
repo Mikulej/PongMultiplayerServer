@@ -28,7 +28,7 @@ void EstableClientConnection(int clientID,std::shared_ptr<Socket> clientSocket){
         receivedStr = clientSocket->Receive();
         receivedStr.c_str();
         clientDirection1 = receivedStr.c_str()[0] - '0';
-        std::cout << clientDirection1 << std::endl;
+        //std::cout << clientDirection1 << std::endl;
     }
     return;
 }
@@ -82,11 +82,10 @@ int main()
     Shader ourShader("shader/vs.glsl", "shader/fs.glsl");
     glfwSwapInterval(1);
     ourShader.use(); 
-    
+    srand (static_cast <unsigned> (time(0)));
     Sprite::Initialize();
-    // Sprite::Add("box",0.3,0.3,0);
-    // Sprite::get(0).setColor(glm::vec4(1,0,0,1));
     Collider::Initialize();
+    Collider::setRandomDirectionAt(0);
 
     //NETWORK
     std::shared_ptr<Socket> clientSocket1 = std::make_shared<Socket>(serverPort1);

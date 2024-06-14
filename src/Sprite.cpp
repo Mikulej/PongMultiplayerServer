@@ -155,9 +155,8 @@ int Sprite::Add(std::string _texture, float _x, float _y, unsigned int _layer, V
             });
             if (notRendered == finish2) {//all are rendered add new at back of this layer
                 //std::cout << "Layer \"" << _layer << "\" exsits - all rendered - added as the last at [" << i + 1 << "]" << std::endl;
-                finish2--;
                 renderList.insert(finish2, Sprite(tex->second, _x, _y, _layer, _VAO));
-                return i;
+                return i + 1;
             }
             //replace notRendered
             //std::cout << "Layer \"" << _layer << "\" exsits - replacing not rendered at [" << i << "]" << std::endl;

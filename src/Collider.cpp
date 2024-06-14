@@ -18,6 +18,27 @@ void Collider::Initialize(){
 }
 bool Collider::Collision(){
     auto ball = colliderList.begin();
+    //check if collides with window border
+    if(ball->y + (ball->height/2.0f) + (ball->speed*ball->directionY*deltaTime)>= 1.0){   
+        ball->y = 1.0 - (ball->height/2.0f);  
+        ball->setPosZero();   
+    }
+    else if(ball->y - (ball->height/2.0f) + (ball->speed*ball->directionY*deltaTime)<= -1.0){
+        ball->y = -1.0 + (ball->height/2.0f);
+        ball->setPosZero();
+    }
+    else if(ball->x + (ball->width/2.0f) + (ball->speed*ball->directionX*deltaTime)>= 1.0){   
+        ball->x = 1.0 - (ball->width/2.0f);
+        ball->setPosZero();      
+    }
+    else if(ball->x - (ball->width/2.0f) + (ball->speed*ball->directionX*deltaTime)<= -1.0){
+        ball->x = -1.0 + (ball->width/2.0f);
+        ball->setPosZero();
+    }
+    else{
+        ball->x += ball->speed*ball->directionX*deltaTime;
+        ball->y += ball->speed*ball->directionY*deltaTime;
+    }
     ball->UpdatePos();
 
     auto player1 = colliderList.begin() + 1;
@@ -43,34 +64,30 @@ bool Collider::Collision(){
         player2->y += player2->speed*player2->directionY*deltaTime;
     }
     player2->UpdatePos();
-    // for (vector<Collider>::iterator i1 = colliderList.begin(), finish = colliderList.end(); i1 != finish; i1++){
-    //     i1->UpdatePos();
-    //     //check if collides with window border
-    //         if(i1->y + (i1->height/2.0f) >= 1.0){
-    //             std::cout << "Touching top border!" << std::endl;               
-    //         }
-    //         if(i1->y - (i1->height/2.0f) <= -1.0){
-    //             std::cout << "Touching bottom border!" << std::endl;
-    //         }
-    //     for (vector<Collider>::iterator i2 = colliderList.begin(), finish = colliderList.end(); i2 != finish; i2++){
-            
-    //         //check collision between i1 and i2
-
-    //         // // collision x-axis?
-    //         // bool collisionX = (*i1).x + (*i1).width >= (*i2).x &&
-    //         // (*i2).x + (*i2).width >= (*i1).x;
-    //         // // collision y-axis?
-    //         // bool collisionY = (*i1).y + (*i1).height >= (*i2).y &&
-    //         // (*i2).y + (*i2).height >= (*i1).y;
-    //         // // collision only if on both axes
-    //         // return collisionX && collisionY;
-    //     }
-    // }
 }
 void Collider::UpdatePos(){
     Sprite::get(img_id).setPos(x,y);
 }
-void Collider::setDirectionAt(float x, float y,int i){
+void Collider::setRandomDirectionAt(int i){
+    float rawX = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    if(rand() % 2){rawX*=-1;}
+    float rawY = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+    if(rand() % 2){rawY*=-1;}
+    float norm = sqrt((rawX*rawX)+(rawY*rawY));
+    colliderList.at(i).directionX = rawX / norm;
+    colliderList.at(i).directionY = rawY / norm;
+    //std::cout<< "X: " <<colliderList.at(i).directionX << "Y: " << colliderList.at(i).directionY << std::endl;
+}
+void Collider::changeDirectionX(){
+    directionX *= -1;
+}
+void Collider::changeDirectionY(){
+    directionY *= -1;
+}
+void Collider::setPosZero(){
+    x=0; y=0;
+}
+void Collider::setDirectionAt(float x, float y,int i){ 
     colliderList.at(i).directionX = x;
     colliderList.at(i).directionY = y;
 }

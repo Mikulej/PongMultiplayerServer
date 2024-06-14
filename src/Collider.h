@@ -14,11 +14,16 @@ class Collider{
     Collider(float x,float y,float width,float height);
     void Move(void);
     inline void UpdatePos(void);
+    inline void setRandomDirection(void);
+    inline void changeDirectionX(void);
+    inline void changeDirectionY(void);
+    inline void setPosZero(void);
     public:
     
     static void Initialize(void);
     static bool Collision();
     static void setDirectionAt(float x, float y,int i);
+    static void setRandomDirectionAt(int i);
     
 };
 #endif

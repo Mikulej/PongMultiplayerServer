@@ -7,6 +7,7 @@ TO DO:
 Parse objects position data to string
 Collision
 Ball movement
+Generate random axis(directionXY), alter it slightly
 
 STEPS:
 1. Create two threads and listen to two ports from there DONE
