@@ -18,30 +18,49 @@ void Collider::Initialize(){
 }
 bool Collider::Collision(){
     auto ball = colliderList.begin();
+    auto player1 = colliderList.begin() + 1;
+    auto player2 = colliderList.begin() + 2;
+    //const float ballStepX = ball->speed*ball->directionY*deltaTime;
     //check if collides with window border
     if(ball->y + (ball->height/2.0f) + (ball->speed*ball->directionY*deltaTime)>= 1.0){   
         ball->y = 1.0 - (ball->height/2.0f);  
-        ball->setPosZero();   
+        ball->changeDirectionY();  
     }
     else if(ball->y - (ball->height/2.0f) + (ball->speed*ball->directionY*deltaTime)<= -1.0){
         ball->y = -1.0 + (ball->height/2.0f);
-        ball->setPosZero();
+        ball->changeDirectionY();  
     }
     else if(ball->x + (ball->width/2.0f) + (ball->speed*ball->directionX*deltaTime)>= 1.0){   
         ball->x = 1.0 - (ball->width/2.0f);
-        ball->setPosZero();      
+        ball->changeDirectionX();   
     }
     else if(ball->x - (ball->width/2.0f) + (ball->speed*ball->directionX*deltaTime)<= -1.0){
         ball->x = -1.0 + (ball->width/2.0f);
-        ball->setPosZero();
+        ball->changeDirectionX(); 
+    }
+    else if(
+    (
+        (ball->y - (ball->height/2.0f) + (ball->speed*ball->directionY*deltaTime) <= player1->y + (player1->height/2.0f) + (player1->speed*player1->directionY*deltaTime)) &&
+        (ball->y - (ball->height/2.0f) + (ball->speed*ball->directionY*deltaTime) >= player1->y - (player1->height/2.0f) + (player1->speed*player1->directionY*deltaTime))
+    )
+    ||
+    (
+        (ball->y + (ball->height/2.0f) + (ball->speed*ball->directionY*deltaTime) <= player1->y + (player1->height/2.0f) + (player1->speed*player1->directionY*deltaTime)) &&
+        (ball->y + (ball->height/2.0f) + (ball->speed*ball->directionY*deltaTime) >= player1->y - (player1->height/2.0f) + (player1->speed*player1->directionY*deltaTime))
+    )  
+    ){
+        if(ball->x + (ball->width/2.0f) + (ball->speed*ball->directionX*deltaTime)>= player1->x - (player1->width/2.0f)){   
+            ball->x = player1->x - (player1->width/2.0f) - (ball->width/2.0f);
+            ball->changeDirectionX();   
+        }
+        ball->x += ball->speed*ball->directionX*deltaTime;
+        ball->y += ball->speed*ball->directionY*deltaTime;
     }
     else{
         ball->x += ball->speed*ball->directionX*deltaTime;
         ball->y += ball->speed*ball->directionY*deltaTime;
     }
-    ball->UpdatePos();
-
-    auto player1 = colliderList.begin() + 1;
+    
     //check if collides with window border
     if(player1->y + (player1->height/2.0f) + (player1->speed*player1->directionY*deltaTime)>= 1.0){   
         player1->y = 1.0 - (player1->height/2.0f);       
@@ -52,8 +71,8 @@ bool Collider::Collision(){
     else{
         player1->y += player1->speed*player1->directionY*deltaTime;
     }
-    player1->UpdatePos();
-    auto player2 = colliderList.begin() + 2;
+    
+    
     if(player2->y + (player2->height/2.0f) + (player2->speed*player2->directionY*deltaTime)>= 1.0){   
         player2->y = 1.0 - (player2->height/2.0f);       
     }
@@ -63,6 +82,8 @@ bool Collider::Collision(){
     else{
         player2->y += player2->speed*player2->directionY*deltaTime;
     }
+    ball->UpdatePos();
+    player1->UpdatePos();
     player2->UpdatePos();
 }
 void Collider::UpdatePos(){
