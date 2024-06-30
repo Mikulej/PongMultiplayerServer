@@ -5,6 +5,7 @@
 #include "Sprite.h"
 
 class Collider{
+    static constexpr float PI = 3.14159265f;
     static std::vector<Collider> colliderList;
     float x,y;
     float width,height;

@@ -7,7 +7,7 @@ Collider::Collider(float x,float y,float scaleX,float scaleY):x(x),y(y){
     Sprite::get(img_id).setScale(scaleX,scaleY);
     width = Sprite::get(img_id).getScaleX() / 16.0f;
     height = Sprite::get(img_id).getScaleY() / 9.0f;
-    speed = 0.5;
+    speed = 1.0f;
 }
 void Collider::Initialize(){
     //add all elements to colliderlist here
@@ -18,69 +18,89 @@ void Collider::Initialize(){
 }
 bool Collider::Collision(){
     auto ball = colliderList.begin();
+    const float ballStepX = ball->speed*ball->directionX*deltaTime;
+    const float ballStepY = ball->speed*ball->directionY*deltaTime;
+
     auto player1 = colliderList.begin() + 1;
+    const float player1StepY = player1->speed*player1->directionY*deltaTime;
+
     auto player2 = colliderList.begin() + 2;
-    //const float ballStepX = ball->speed*ball->directionY*deltaTime;
+    const float player2StepY = player2->speed*player2->directionY*deltaTime;
+    
+    
     //check if collides with window border
-    if(ball->y + (ball->height/2.0f) + (ball->speed*ball->directionY*deltaTime)>= 1.0){   
+    if(ball->y + (ball->height/2.0f) + (ballStepY)>= 1.0){   
         ball->y = 1.0 - (ball->height/2.0f);  
         ball->changeDirectionY();  
     }
-    else if(ball->y - (ball->height/2.0f) + (ball->speed*ball->directionY*deltaTime)<= -1.0){
+    else if(ball->y - (ball->height/2.0f) + (ballStepY)<= -1.0){
         ball->y = -1.0 + (ball->height/2.0f);
         ball->changeDirectionY();  
     }
-    else if(ball->x + (ball->width/2.0f) + (ball->speed*ball->directionX*deltaTime)>= 1.0){   
+    if(ball->x + (ball->width/2.0f) + (ballStepX)>= 1.0){   
         ball->x = 1.0 - (ball->width/2.0f);
         ball->changeDirectionX();   
     }
-    else if(ball->x - (ball->width/2.0f) + (ball->speed*ball->directionX*deltaTime)<= -1.0){
+    else if(ball->x - (ball->width/2.0f) + (ballStepX)<= -1.0){
         ball->x = -1.0 + (ball->width/2.0f);
         ball->changeDirectionX(); 
     }
-    else if(
+    if(
     (
-        (ball->y - (ball->height/2.0f) + (ball->speed*ball->directionY*deltaTime) <= player1->y + (player1->height/2.0f) + (player1->speed*player1->directionY*deltaTime)) &&
-        (ball->y - (ball->height/2.0f) + (ball->speed*ball->directionY*deltaTime) >= player1->y - (player1->height/2.0f) + (player1->speed*player1->directionY*deltaTime))
+        (ball->y - (ball->height/2.0f) + (ballStepY) <= player1->y + (player1->height/2.0f) + (player1StepY)) &&
+        (ball->y - (ball->height/2.0f) + (ballStepY) >= player1->y - (player1->height/2.0f) + (player1StepY))
     )
     ||
     (
-        (ball->y + (ball->height/2.0f) + (ball->speed*ball->directionY*deltaTime) <= player1->y + (player1->height/2.0f) + (player1->speed*player1->directionY*deltaTime)) &&
-        (ball->y + (ball->height/2.0f) + (ball->speed*ball->directionY*deltaTime) >= player1->y - (player1->height/2.0f) + (player1->speed*player1->directionY*deltaTime))
+        (ball->y + (ball->height/2.0f) + (ballStepY) <= player1->y + (player1->height/2.0f) + (player1StepY)) &&
+        (ball->y + (ball->height/2.0f) + (ballStepY) >= player1->y - (player1->height/2.0f) + (player1StepY))
     )  
     ){
-        if(ball->x + (ball->width/2.0f) + (ball->speed*ball->directionX*deltaTime)>= player1->x - (player1->width/2.0f)){   
+        if((ball->x + (ball->width/2.0f) < player1->x - (player1->width/2.0f))&& (ball->x + (ball->width/2.0f) + (ballStepX)>= player1->x - (player1->width/2.0f))){   
             ball->x = player1->x - (player1->width/2.0f) - (ball->width/2.0f);
             ball->changeDirectionX();   
         }
-        ball->x += ball->speed*ball->directionX*deltaTime;
-        ball->y += ball->speed*ball->directionY*deltaTime;
+        
     }
-    else{
-        ball->x += ball->speed*ball->directionX*deltaTime;
-        ball->y += ball->speed*ball->directionY*deltaTime;
+    if(
+    (
+        (ball->y - (ball->height/2.0f) + (ballStepY) <= player2->y + (player2->height/2.0f) + (player2StepY)) &&
+        (ball->y - (ball->height/2.0f) + (ballStepY) >= player2->y - (player2->height/2.0f) + (player2StepY))
+    )
+    ||
+    (
+        (ball->y + (ball->height/2.0f) + (ballStepY) <= player2->y + (player2->height/2.0f) + (player2StepY)) &&
+        (ball->y + (ball->height/2.0f) + (ballStepY) >= player2->y - (player2->height/2.0f) + (player2StepY))
+    )  
+    ){
+        if((ball->x - (ball->width/2.0f) > player2->x + (player2->width/2.0f))&&(ball->x - (ball->width/2.0f) + (ballStepX)<= player2->x + (player2->width/2.0f))){   
+            ball->x = player2->x + (player2->width/2.0f) + (ball->width/2.0f);
+            ball->changeDirectionX();   
+        }
     }
     
+    ball->x += ballStepX;
+    ball->y += ballStepY;
+    
     //check if collides with window border
-    if(player1->y + (player1->height/2.0f) + (player1->speed*player1->directionY*deltaTime)>= 1.0){   
+    if(player1->y + (player1->height/2.0f) + (player1StepY)>= 1.0){   
         player1->y = 1.0 - (player1->height/2.0f);       
     }
-    else if(player1->y - (player1->height/2.0f) + (player1->speed*player1->directionY*deltaTime)<= -1.0){
+    else if(player1->y - (player1->height/2.0f) + (player1StepY)<= -1.0){
         player1->y = -1.0 + (player1->height/2.0f);
     }
     else{
-        player1->y += player1->speed*player1->directionY*deltaTime;
+        player1->y += player1StepY;
     }
     
-    
-    if(player2->y + (player2->height/2.0f) + (player2->speed*player2->directionY*deltaTime)>= 1.0){   
+    if(player2->y + (player2->height/2.0f) + (player2StepY)>= 1.0){   
         player2->y = 1.0 - (player2->height/2.0f);       
     }
-    else if(player2->y - (player2->height/2.0f) + (player2->speed*player2->directionY*deltaTime)<= -1.0){
+    else if(player2->y - (player2->height/2.0f) + (player2StepY)<= -1.0){
         player2->y = -1.0 + (player2->height/2.0f);
     }
     else{
-        player2->y += player2->speed*player2->directionY*deltaTime;
+        player2->y += player2StepY;
     }
     ball->UpdatePos();
     player1->UpdatePos();
@@ -101,6 +121,17 @@ void Collider::setRandomDirectionAt(int i){
 }
 void Collider::changeDirectionX(){
     directionX *= -1;
+    const float x = directionX;
+    const float y = directionY;
+    const float angle = PI * ((rand() % 31) - 15)/ 180.0f;
+    std::cout << "moved by angle: " << angle << std::endl;
+    const float rawX = (x * cos(angle)) - (y * sin(angle));
+    const float rawY = (x * sin(angle)) + (x * cos(angle));
+    const float norm = sqrt((rawX*rawX)+(rawY*rawY));
+    directionX = rawX / norm;
+    directionY = rawY / norm;
+    //directionX = (x * cos(angle)) - (y * sin(angle));
+    //directionY = (x * sin(angle)) + (x * cos(angle));
 }
 void Collider::changeDirectionY(){
     directionY *= -1;
