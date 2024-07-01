@@ -79,8 +79,9 @@ bool Collider::Collision(){
         }
     }
     
-    ball->x += ballStepX;
-    ball->y += ballStepY;
+    ball->x +=  ball->speed*ball->directionX*deltaTime;
+    ball->y +=  ball->speed*ball->directionY*deltaTime;
+   
     
     //check if collides with window border
     if(player1->y + (player1->height/2.0f) + (player1StepY)>= 1.0){   
@@ -124,14 +125,11 @@ void Collider::changeDirectionX(){
     const float x = directionX;
     const float y = directionY;
     const float angle = PI * ((rand() % 31) - 15)/ 180.0f;
-    std::cout << "moved by angle: " << angle << std::endl;
     const float rawX = (x * cos(angle)) - (y * sin(angle));
     const float rawY = (x * sin(angle)) + (x * cos(angle));
     const float norm = sqrt((rawX*rawX)+(rawY*rawY));
     directionX = rawX / norm;
     directionY = rawY / norm;
-    //directionX = (x * cos(angle)) - (y * sin(angle));
-    //directionY = (x * sin(angle)) + (x * cos(angle));
 }
 void Collider::changeDirectionY(){
     directionY *= -1;
