@@ -118,7 +118,6 @@ void Collider::setRandomDirectionAt(int i){
     float norm = sqrt((rawX*rawX)+(rawY*rawY));
     colliderList.at(i).directionX = rawX / norm;
     colliderList.at(i).directionY = rawY / norm;
-    //std::cout<< "X: " <<colliderList.at(i).directionX << "Y: " << colliderList.at(i).directionY << std::endl;
 }
 void Collider::changeDirectionX(){
     directionX *= -1;
@@ -126,13 +125,62 @@ void Collider::changeDirectionX(){
     const float y = directionY;
     const float angle = PI * ((rand() % 31) - 15)/ 180.0f;
     const float rawX = (x * cos(angle)) - (y * sin(angle));
-    const float rawY = (x * sin(angle)) + (x * cos(angle));
+    const float rawY = (x * sin(angle)) + (y * cos(angle));
     const float norm = sqrt((rawX*rawX)+(rawY*rawY));
     directionX = rawX / norm;
     directionY = rawY / norm;
 }
 void Collider::changeDirectionY(){
+    constexpr float cutOffAngle = 30.0f;
     directionY *= -1;
+    if(directionY > 0){
+        constexpr float cufOffLeft = 90.0f + cutOffAngle;
+        constexpr float cufOffRight = 90.0f - cutOffAngle;
+        const float oldAngle = atan2(directionY, directionX)*180.0f/PI;
+        if(oldAngle < cufOffLeft && oldAngle >= 90.0f){//if angle of vector is close to stright Y-line change it to  45 +- 10
+            const float newAngle = (PI * ((rand() % 21) - 10 + 45.0f + 90.0f)/ 180.0f) ;
+            const float rawX = cos(newAngle);
+            const float rawY = sin(newAngle);
+            const float norm = sqrt((rawX*rawX)+(rawY*rawY));
+            directionX = rawX / norm;
+            directionY = rawY / norm;
+            return;
+        }
+        else if(oldAngle > cufOffRight && oldAngle < 90.0f){
+            const float newAngle = (PI * ((rand() % 21) - 10 - 45.0f + 90.0f)/ 180.0f) ;
+            const float rawX = cos(newAngle);
+            const float rawY = sin(newAngle);
+            const float norm = sqrt((rawX*rawX)+(rawY*rawY));
+            directionX = rawX / norm;
+            directionY = rawY / norm;
+            return;
+        }
+    }
+    else{
+        constexpr float cufOffLeft = 270.0f - cutOffAngle;
+        constexpr float cufOffRight = 270.0f + cutOffAngle;
+        float oldAngle = atan2(directionY, directionX);
+        oldAngle = (2*PI + oldAngle) * 360 / (2*PI);
+
+        if(oldAngle > cufOffLeft && oldAngle < 270.0f){//if angle of vector is close to stright Y-line change it to  45 +- 10
+            const float newAngle = (PI * ((rand() % 21) - 10 - 45.0f + 270.0f)/ 180.0f) ;
+            const float rawX = cos(newAngle);
+            const float rawY = sin(newAngle);
+            const float norm = sqrt((rawX*rawX)+(rawY*rawY));
+            directionX = rawX / norm;
+            directionY = rawY / norm;
+            return;
+        }
+        else if(oldAngle < cufOffRight && oldAngle >= 270.0f){
+            const float newAngle = (PI * ((rand() % 21) - 10 + 45.0f + 270.0f)/ 180.0f) ;
+            const float rawX = cos(newAngle);
+            const float rawY = sin(newAngle);
+            const float norm = sqrt((rawX*rawX)+(rawY*rawY));
+            directionX = rawX / norm;
+            directionY = rawY / norm;
+            return;
+        }
+    }
 }
 void Collider::setPosZero(){
     x=0; y=0;

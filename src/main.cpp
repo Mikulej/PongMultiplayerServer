@@ -196,7 +196,6 @@ void processInput(GLFWwindow *window)
     float currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
-
     // bool neutralInput = true;
     // if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
     //     //send message
