@@ -9,6 +9,13 @@ Collider::Collider(float x,float y,float scaleX,float scaleY):x(x),y(y){
     height = Sprite::get(img_id).getScaleY() / 9.0f;
     speed = 1.0f;
 }
+std::string Collider::parseAll(void){
+    std::stringstream ss;
+    for(const auto& c : colliderList){    
+        ss << c.x << " " << c.y << " ";
+    }
+    return ss.str();
+}
 void Collider::Initialize(){
     //add all elements to colliderlist here
     //colliderlist[0] is ball [1] is player1 [2] is player2

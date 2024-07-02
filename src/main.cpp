@@ -90,6 +90,7 @@ int main()
     //NETWORK
     std::shared_ptr<Socket> clientSocket1 = std::make_shared<Socket>(serverPort1);
     std::thread threadClient1(EstableClientConnection,1,clientSocket1);
+    //std::thread threadSendData(sendData,clientSocket1,clientSocket1); //CHANGE TO CLIENTSOCKET2
     //std::thread threadClient2(EstableClientConnection,2);
     while(!clientReady1){
 
@@ -136,7 +137,9 @@ int main()
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
     Sprite::DeleteTextures();
+    //threadSendData.join();
     threadClient1.join(); //stop main thread until t1 finishes its work
+    
     //threadClient2.join();
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
@@ -181,8 +184,7 @@ inline void processReceivedData(){
 }
 inline void sendData(std::shared_ptr<Socket> clientSocket1,std::shared_ptr<Socket> clientSocket2){
     while(true){
-        clientSocket1->Send("10 10 10");
-        //clientSocket2->Send("20 20 20");
+        clientSocket1->Send(Collider::parseAll());
 
     }
 }
@@ -196,6 +198,9 @@ void processInput(GLFWwindow *window)
     float currentFrame = glfwGetTime();
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+        
+    }
     // bool neutralInput = true;
     // if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
     //     //send message

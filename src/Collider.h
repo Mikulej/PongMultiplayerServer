@@ -19,8 +19,9 @@ class Collider{
     inline void changeDirectionX(void);
     inline void changeDirectionY(void);
     inline void setPosZero(void);
+
     public:
-    
+    static std::string parseAll(void);
     static void Initialize(void);
     static bool Collision();
     static void setDirectionAt(float x, float y,int i);
