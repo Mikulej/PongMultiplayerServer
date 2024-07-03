@@ -28,7 +28,7 @@ void EstableClientConnection(int clientID,std::shared_ptr<Socket> clientSocket){
         receivedStr = clientSocket->Receive();
         receivedStr.c_str();
         clientDirection1 = receivedStr.c_str()[0] - '0';
-        //std::cout << clientDirection1 << std::endl;
+        std::this_thread::sleep_for (std::chrono::milliseconds(16));
     }
     return;
 }
@@ -90,12 +90,12 @@ int main()
     //NETWORK
     std::shared_ptr<Socket> clientSocket1 = std::make_shared<Socket>(serverPort1);
     std::thread threadClient1(EstableClientConnection,1,clientSocket1);
-    //std::thread threadSendData(sendData,clientSocket1,clientSocket1); //CHANGE TO CLIENTSOCKET2
+    
     //std::thread threadClient2(EstableClientConnection,2);
     while(!clientReady1){
 
     }
-    
+    std::thread threadSendData(sendData,clientSocket1,clientSocket1); //CHANGE TO CLIENTSOCKET2
     // while(!(clientReady1 && clientReady2)){
     //     //wait until both clients conntect to the server
     // }
@@ -137,7 +137,7 @@ int main()
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
     Sprite::DeleteTextures();
-    //threadSendData.join();
+    threadSendData.join();
     threadClient1.join(); //stop main thread until t1 finishes its work
     
     //threadClient2.join();
@@ -185,7 +185,7 @@ inline void processReceivedData(){
 inline void sendData(std::shared_ptr<Socket> clientSocket1,std::shared_ptr<Socket> clientSocket2){
     while(true){
         clientSocket1->Send(Collider::parseAll());
-
+        std::this_thread::sleep_for (std::chrono::milliseconds(16));
     }
 }
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly

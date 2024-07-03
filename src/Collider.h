@@ -13,7 +13,6 @@ class Collider{
     float directionX, directionY; //normalized vector, values between 0 and 1
     int img_id;//purely for tests before switching to server-client architecture
     Collider(float x,float y,float width,float height);
-    void Move(void);
     inline void UpdatePos(void);
     inline void setRandomDirection(void);
     inline void changeDirectionX(void);

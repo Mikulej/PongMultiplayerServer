@@ -196,6 +196,3 @@ void Collider::setDirectionAt(float x, float y,int i){
     colliderList.at(i).directionX = x;
     colliderList.at(i).directionY = y;
 }
-void Collider::Move(){
-    Sprite::get(img_id).addPos(speed*directionX*deltaTime,speed*directionY*deltaTime);
-}
