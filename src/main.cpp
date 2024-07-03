@@ -1,9 +1,13 @@
 #include "main.h"
 constexpr int serverPort1 = 66671;
 constexpr int serverPort2 = 66672;
-constexpr char* serverIp = "127.0.0.1";
+std::string serverIp;
 static bool clientReady1 = false, clientReady2 = false;
 static int clientDirection1 = 5, clientDirection2 = 5; //8 = UP, 5 = NEUTRAL, 2 = DOWN
+void readIp(void){
+    std::ifstream fs("../config.txt");
+    getline(fs,serverIp);
+}
 void EstableClientConnection(int clientID,std::shared_ptr<Socket> clientSocket){
     int serverPort = 0;
     if(clientID==1){
@@ -82,7 +86,9 @@ int main()
     Shader ourShader("shader/vs.glsl", "shader/fs.glsl");
     glfwSwapInterval(1);
     ourShader.use(); 
+
     srand (static_cast <unsigned> (time(0)));
+    readIp();
     Sprite::Initialize();
     Collider::Initialize();
     Collider::setRandomDirectionAt(0);
