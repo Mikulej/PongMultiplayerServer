@@ -1,6 +1,6 @@
 #include "main.h"
-constexpr int serverPort1 = 66671;
-constexpr int serverPort2 = 66672;
+constexpr int serverPort1 = 27001;
+constexpr int serverPort2 = 27002;
 std::string serverIp;
 static bool clientReady1 = false, clientReady2 = false;
 static int clientDirection1 = 5, clientDirection2 = 5; //8 = UP, 5 = NEUTRAL, 2 = DOWN
@@ -95,16 +95,14 @@ int main()
 
     //NETWORK
     std::shared_ptr<Socket> clientSocket1 = std::make_shared<Socket>(serverPort1);
+    std::shared_ptr<Socket> clientSocket2 = std::make_shared<Socket>(serverPort2);
     std::thread threadClient1(EstableClientConnection,1,clientSocket1);
+    std::thread threadClient2(EstableClientConnection,2,clientSocket2);
     
-    //std::thread threadClient2(EstableClientConnection,2);
-    while(!clientReady1){
+    while(!clientReady1 || !clientReady2){
 
     }
-    std::thread threadSendData(sendData,clientSocket1,clientSocket1); //CHANGE TO CLIENTSOCKET2
-    // while(!(clientReady1 && clientReady2)){
-    //     //wait until both clients conntect to the server
-    // }
+    std::thread threadSendData(sendData,clientSocket1,clientSocket2); //CHANGE TO CLIENTSOCKET2
     //Start a game, use threadClient1 and threadClient2 to receive input
 
 
