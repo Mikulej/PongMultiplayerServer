@@ -1,32 +1,13 @@
 #include "main.h"
+constexpr int serverPort0 = 27000;
 constexpr int serverPort1 = 27001;
 constexpr int serverPort2 = 27002;
 std::string serverIp;
 static bool clientReady1 = false, clientReady2 = false;
 static int clientDirection1 = 5, clientDirection2 = 5; //8 = UP, 5 = NEUTRAL, 2 = DOWN
-void readIp(void){
-    std::ifstream fs("../config.txt");
-    getline(fs,serverIp);
-}
-void EstableClientConnection(int clientID,std::shared_ptr<Socket> clientSocket){
-    int serverPort = 0;
-    if(clientID==1){
-        serverPort = serverPort1;
-    }
-    else{
-        serverPort = serverPort2;
-    }
-    clientSocket->Bind(serverIp);
-    std::cout << "Listening for " << clientID << std::endl;
-    clientSocket->Listen();
-    clientSocket->Accept();
-    std::cout << "Client " << clientID << " accepted" << std::endl;
-    if(clientID==1){
-        clientReady1 = true;
-    }
-    else{
-        clientReady2 = true;
-    }
+int numberOfClients = 0;//requires lock guard
+void maintainClient1(std::shared_ptr<Socket> clientSocket){
+    clientReady1 = true;
     std::string receivedStr;
     while(true){
         receivedStr = clientSocket->Receive();
@@ -34,6 +15,110 @@ void EstableClientConnection(int clientID,std::shared_ptr<Socket> clientSocket){
         clientDirection1 = receivedStr.c_str()[0] - '0';
         std::this_thread::sleep_for (std::chrono::milliseconds(16));
     }
+}
+void maintainClient2(std::shared_ptr<Socket> clientSocket){
+    clientReady2 = true;
+        std::string receivedStr;
+        while(true){
+            receivedStr = clientSocket->Receive();
+            receivedStr.c_str();
+            clientDirection2 = receivedStr.c_str()[0] - '0';
+            std::this_thread::sleep_for (std::chrono::milliseconds(16));
+        }
+}
+int assignPortToClient(){
+    std::shared_ptr<Socket> clientSocket = std::make_shared<Socket>(27000);
+    //std::mutex mutexNumberOfClients;
+    //clientSocket->setPort(serverPort0);
+    clientSocket->Bind(serverIp);
+    std::cout << "Listening for potential clients with numberOfClients=" << numberOfClients << std::endl;
+    clientSocket->Listen();
+    clientSocket->Accept();
+    //mutexNumberOfClients.lock();
+    numberOfClients++;
+    std::cout << "Assigned to Client nr" << numberOfClients << " port " << serverPort0 + numberOfClients << std::endl;
+    clientSocket->Send(std::to_string(serverPort0 + numberOfClients));
+
+    std::cout << "Awaiting reposne from client nr" << numberOfClients << std::endl;
+    //mutexNumberOfClients.unlock();
+    clientSocket->Receive();
+    std::cout << "Client responded!" << std::endl;
+    clientSocket->Close();
+    return serverPort0 + numberOfClients;
+}
+void readIp(void){
+    std::ifstream fs("../config.txt");
+    getline(fs,serverIp);
+}
+void EstableClientConnection(std::shared_ptr<Socket> clientSocket1,std::shared_ptr<Socket> clientSocket2){
+    // int port = assignPortToClient();
+    // std::cout << "Using port " << port << std::endl;
+    // clientSocket->setPort(port);
+    // clientSocket->Bind(serverIp);
+    // clientSocket->Listen();
+    // clientSocket->Accept();
+    // std::cout << "Client can play now!" << std::endl;
+
+    int port = -1;
+    port = assignPortToClient();
+    std::cout << "Using port " << port << std::endl;
+    clientSocket1->setPort(port);
+    clientSocket1->Bind(serverIp);
+    clientSocket1->Listen();
+    clientSocket1->Accept();
+    std::cout << "Client can play now!" << std::endl;
+    std::thread threadClient1(maintainClient1,clientSocket1);
+
+    port = assignPortToClient();
+    std::cout << "Using port " << port << std::endl;
+    clientSocket2->setPort(port);
+    clientSocket2->Bind(serverIp);
+    clientSocket2->Listen();
+    clientSocket2->Accept();
+    std::cout << "Client can play now!" << std::endl;
+    std::thread threadClient2(maintainClient2,clientSocket2);
+
+    threadClient1.join();
+    threadClient2.join();
+    // int serverPort = 0;
+    // if(clientID==1){
+    //     serverPort = serverPort1;
+    // }
+    // else{
+    //     serverPort = serverPort2;
+    // }
+    
+    // std::cout << "Listening for " << clientID << std::endl;
+    // clientSocket->Listen();
+    // if((!clientReady1&&clientID==1)||(!clientReady2&&clientID==2)){
+    //     clientSocket->Accept();
+    //     std::cout << "Client " << clientID << " accepted" << std::endl;
+    // }
+    // else{
+    //     std::cout << "Client " << clientID << " NOT accepted" << std::endl;
+    // }
+    
+    // if(clientID==1){
+    //     clientReady1 = true;
+    //     std::string receivedStr;
+    //     while(true){
+    //         receivedStr = clientSocket->Receive();
+    //         receivedStr.c_str();
+    //         clientDirection1 = receivedStr.c_str()[0] - '0';
+    //         std::this_thread::sleep_for (std::chrono::milliseconds(16));
+    //     }
+    // }
+    // else{
+    //     clientReady2 = true;
+    //     std::string receivedStr;
+    //     while(true){
+    //         receivedStr = clientSocket->Receive();
+    //         receivedStr.c_str();
+    //         clientDirection2 = receivedStr.c_str()[0] - '0';
+    //         std::this_thread::sleep_for (std::chrono::milliseconds(16));
+    //     }
+    // }
+    
     return;
 }
 
@@ -94,10 +179,14 @@ int main()
     Collider::setRandomDirectionAt(0);
 
     //NETWORK
-    std::shared_ptr<Socket> clientSocket1 = std::make_shared<Socket>(serverPort1);
-    std::shared_ptr<Socket> clientSocket2 = std::make_shared<Socket>(serverPort2);
-    std::thread threadClient1(EstableClientConnection,1,clientSocket1);
-    std::thread threadClient2(EstableClientConnection,2,clientSocket2);
+    // std::shared_ptr<Socket> clientSocket1 = std::make_shared<Socket>(serverPort1);
+    // std::shared_ptr<Socket> clientSocket2 = std::make_shared<Socket>(serverPort2);
+    std::shared_ptr<Socket> clientSocket1 = std::make_shared<Socket>();
+    std::shared_ptr<Socket> clientSocket2 = std::make_shared<Socket>();
+    //std::thread threadClient1(EstableClientConnection,1,clientSocket1);
+    //std::thread threadClient2(EstableClientConnection,2,clientSocket2);
+    EstableClientConnection(clientSocket1,clientSocket2);
+
     
     while(!clientReady1 || !clientReady2){
 
@@ -142,7 +231,7 @@ int main()
     // ------------------------------------------------------------------------
     Sprite::DeleteTextures();
     threadSendData.join();
-    threadClient1.join(); //stop main thread until t1 finishes its work
+    //threadClient1.join(); //stop main thread until t1 finishes its work
     
     //threadClient2.join();
     // glfw: terminate, clearing all previously allocated GLFW resources.

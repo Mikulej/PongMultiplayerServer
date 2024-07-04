@@ -1,6 +1,7 @@
 #include "Socket.h"
 
-
+// WSADATA Socket::wsaData;
+// int Socket::wsaerr;
 void Socket::Initialize(){
     WORD wVersionRequested = MAKEWORD(2,2);
     wsaerr = WSAStartup(wVersionRequested, &wsaData);
@@ -26,6 +27,12 @@ Socket::Socket(int port):port(port){
     }
 }
 int Socket::Bind(std::string ip){
+    if(port==-1){
+        std::cout << "bind() failed! - port is -1" << WSAGetLastError() << std::endl;
+        closesocket(serverSocket);
+        WSACleanup();
+        return 0;
+    }
     sockaddr_in service;
     service.sin_family = AF_INET;
     //InetPton(AF_INET,_T("127.0.0.1"), &service.sin_addr.s_addr);
@@ -80,4 +87,11 @@ void Socket::Send(std::string buffer){
     else{
        WSACleanup();
     }
+}
+void Socket::setPort(int port){
+    this->port = port;
+}
+void Socket::Close(void){
+    closesocket(serverSocket);
+    //WSACleanup();
 }
