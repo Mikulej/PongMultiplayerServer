@@ -129,8 +129,8 @@ inline void processReceivedData(void);
 inline void sendData(std::shared_ptr<Socket> clientSocket1,std::shared_ptr<Socket> clientSocket2);
 
 // settings
-int SCR_WIDTH = 1600;
-int SCR_HEIGHT = 900;
+int SCR_WIDTH = 600;//1600;
+int SCR_HEIGHT = 300;//900;
 float deltaTime = 0.0f; // Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
 
@@ -185,7 +185,8 @@ int main()
     std::shared_ptr<Socket> clientSocket2 = std::make_shared<Socket>();
     //std::thread threadClient1(EstableClientConnection,1,clientSocket1);
     //std::thread threadClient2(EstableClientConnection,2,clientSocket2);
-    EstableClientConnection(clientSocket1,clientSocket2);
+    std::thread threadClients(EstableClientConnection,clientSocket1,clientSocket2);
+    
 
     
     while(!clientReady1 || !clientReady2){
@@ -231,6 +232,7 @@ int main()
     // ------------------------------------------------------------------------
     Sprite::DeleteTextures();
     threadSendData.join();
+    threadClients.join();
     //threadClient1.join(); //stop main thread until t1 finishes its work
     
     //threadClient2.join();
@@ -278,6 +280,7 @@ inline void processReceivedData(){
 inline void sendData(std::shared_ptr<Socket> clientSocket1,std::shared_ptr<Socket> clientSocket2){
     while(true){
         clientSocket1->Send(Collider::parseAll());
+        clientSocket2->Send(Collider::parseAll());
         std::this_thread::sleep_for (std::chrono::milliseconds(16));
     }
 }
