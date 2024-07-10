@@ -14,7 +14,8 @@
                 "${workspaceFolder}/src/*.cpp",
                 "${workspaceFolder}/src/glad.c",
                 "-o",
-                "${workspaceFolder}/build/PongMultiplayerServer.exe"
+                "${workspaceFolder}/build/PongMultiplayerServer.exe",
+                "-static"
             ],
             "options": {
                 "cwd": "${fileDirname}"

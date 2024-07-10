@@ -51,13 +51,6 @@ void readIp(void){
     getline(fs,serverIp);
 }
 void EstableClientConnection(std::shared_ptr<Socket> clientSocket1,std::shared_ptr<Socket> clientSocket2){
-    // int port = assignPortToClient();
-    // std::cout << "Using port " << port << std::endl;
-    // clientSocket->setPort(port);
-    // clientSocket->Bind(serverIp);
-    // clientSocket->Listen();
-    // clientSocket->Accept();
-    // std::cout << "Client can play now!" << std::endl;
 
     int port = -1;
     port = assignPortToClient();
@@ -80,45 +73,7 @@ void EstableClientConnection(std::shared_ptr<Socket> clientSocket1,std::shared_p
 
     threadClient1.join();
     threadClient2.join();
-    // int serverPort = 0;
-    // if(clientID==1){
-    //     serverPort = serverPort1;
-    // }
-    // else{
-    //     serverPort = serverPort2;
-    // }
-    
-    // std::cout << "Listening for " << clientID << std::endl;
-    // clientSocket->Listen();
-    // if((!clientReady1&&clientID==1)||(!clientReady2&&clientID==2)){
-    //     clientSocket->Accept();
-    //     std::cout << "Client " << clientID << " accepted" << std::endl;
-    // }
-    // else{
-    //     std::cout << "Client " << clientID << " NOT accepted" << std::endl;
-    // }
-    
-    // if(clientID==1){
-    //     clientReady1 = true;
-    //     std::string receivedStr;
-    //     while(true){
-    //         receivedStr = clientSocket->Receive();
-    //         receivedStr.c_str();
-    //         clientDirection1 = receivedStr.c_str()[0] - '0';
-    //         std::this_thread::sleep_for (std::chrono::milliseconds(16));
-    //     }
-    // }
-    // else{
-    //     clientReady2 = true;
-    //     std::string receivedStr;
-    //     while(true){
-    //         receivedStr = clientSocket->Receive();
-    //         receivedStr.c_str();
-    //         clientDirection2 = receivedStr.c_str()[0] - '0';
-    //         std::this_thread::sleep_for (std::chrono::milliseconds(16));
-    //     }
-    // }
-    
+
     return;
 }
 
@@ -179,12 +134,8 @@ int main()
     Collider::setRandomDirectionAt(0);
 
     //NETWORK
-    // std::shared_ptr<Socket> clientSocket1 = std::make_shared<Socket>(serverPort1);
-    // std::shared_ptr<Socket> clientSocket2 = std::make_shared<Socket>(serverPort2);
     std::shared_ptr<Socket> clientSocket1 = std::make_shared<Socket>();
     std::shared_ptr<Socket> clientSocket2 = std::make_shared<Socket>();
-    //std::thread threadClient1(EstableClientConnection,1,clientSocket1);
-    //std::thread threadClient2(EstableClientConnection,2,clientSocket2);
     std::thread threadClients(EstableClientConnection,clientSocket1,clientSocket2);
     
 
@@ -192,15 +143,8 @@ int main()
     while(!clientReady1 || !clientReady2){
 
     }
-    std::thread threadSendData(sendData,clientSocket1,clientSocket2); //CHANGE TO CLIENTSOCKET2
-    //Start a game, use threadClient1 and threadClient2 to receive input
+    std::thread threadSendData(sendData,clientSocket1,clientSocket2); 
 
-
-    
-
-    // Sprite::get(idplayer1).setScale(0.5,2.5);
-    // int idplayer2 = Sprite::Add("box",-0.8f,0,0);
-    // Sprite::get(idplayer2).setScale(0.5,2.5);
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -297,33 +241,6 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
         
     }
-    // bool neutralInput = true;
-    // if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-    //     //send message
-    //     s.Send("Q");
-    // //     std::thread networkThread([&s](){
-    // //         s.Send("Hej!");
-    // //     });
-    // }
-    // if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-    //     Sprite::get(0).addPos(0,1.0f*deltaTime);
-    //     neutralInput = false;
-    //     s.Send("W");
-    // }
-    // if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-    //     Sprite::get(0).addPos(0,-1.0f*deltaTime);
-    //     neutralInput = false;
-    //     s.Send("S");
-    // }
-    // if(neutralInput){
-    //     s.Send("N");
-    // }
-    // if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-    //     Sprite::get(1).addPos(0,-1.0f*deltaTime);
-    // }
-    // if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-    //     Sprite::get(1).addPos(0,1.0f*deltaTime);
-    // }
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes

@@ -1,7 +1,5 @@
 #include "Socket.h"
 
-// WSADATA Socket::wsaData;
-// int Socket::wsaerr;
 void Socket::Initialize(){
     WORD wVersionRequested = MAKEWORD(2,2);
     wsaerr = WSAStartup(wVersionRequested, &wsaData);
@@ -35,7 +33,6 @@ int Socket::Bind(std::string ip){
     }
     sockaddr_in service;
     service.sin_family = AF_INET;
-    //InetPton(AF_INET,_T("127.0.0.1"), &service.sin_addr.s_addr);
     std::wstring stemp = std::wstring(ip.begin(), ip.end());
     LPCSTR sw = ip.c_str();
     InetPton(AF_INET,sw, &service.sin_addr.s_addr);
