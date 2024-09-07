@@ -23,7 +23,7 @@ void Collider::Initialize(){
     colliderList.push_back(Collider(0.8f,0,0.5f,2.5f));
     colliderList.push_back(Collider(-0.8f,0,0.5f,2.5f));
 }
-bool Collider::Collision(){
+void Collider::Collision(){
     auto ball = colliderList.begin();
     const float ballStepX = ball->speed*ball->directionX*deltaTime;
     const float ballStepY = ball->speed*ball->directionY*deltaTime;

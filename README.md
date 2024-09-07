@@ -1,16 +1,14 @@
 # Pong Multiplayer Server
-1. Host a game
-2. Listen to client on sockets
+Server for a simple Pong game made with Windows' sockets and OpenGL.  
+Repository for a client can be found [here](https://github.com/Mikulej/PongMultiplayer)  
+![ponggif](showcase/pong.gif)  
 
+# Requirements
+- Windows
+- g++
 
-TO DO:
-Parse objects position data to string
-Collision
-Ball movement
-Generate random axis(directionXY), alter it slightly
-
-STEPS:
-1. Create two threads and listen to two ports from there DONE
-2. Send player input data to the main 3rd thread DONE
-3. Simulate the game
-4. Send player input data from network threads to the main thread
+Thoughts:  
+Next time use z-buffer for depth  
+.dll hell  
+Bare sockets are not reliable, data order may change on receiving end  
+Next time use one repository for client and server  

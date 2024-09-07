@@ -11,7 +11,6 @@ void maintainClient1(std::shared_ptr<Socket> clientSocket){
     std::string receivedStr;
     while(true){
         receivedStr = clientSocket->Receive();
-        receivedStr.c_str();
         clientDirection1 = receivedStr.c_str()[0] - '0';
         std::this_thread::sleep_for (std::chrono::milliseconds(16));
     }
@@ -21,7 +20,6 @@ void maintainClient2(std::shared_ptr<Socket> clientSocket){
         std::string receivedStr;
         while(true){
             receivedStr = clientSocket->Receive();
-            receivedStr.c_str();
             clientDirection2 = receivedStr.c_str()[0] - '0';
             std::this_thread::sleep_for (std::chrono::milliseconds(16));
         }

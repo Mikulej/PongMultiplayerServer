@@ -45,14 +45,17 @@ int Socket::Bind(std::string ip){
     }
     else{
         std::cout << "bind() is OK!" << std::endl;
+        return 1;
     }
 }
 int Socket::Listen(){
     if(listen(serverSocket,1)==SOCKET_ERROR){
         std::cout<<"listen(): Error listening on socket" << std::endl;
+        return 0;
     }
     else{
         std::cout<<"listen() is OK, waiting for connections..." << std::endl;
+        return 1;
     }
 }
 int Socket::Accept(){
@@ -63,6 +66,7 @@ int Socket::Accept(){
         return 0;
     }
     std::cout<<"Accepted connection" << std::endl;
+    return 1;
 }
 std::string Socket::Receive(){
     char buffer[100] ={0};

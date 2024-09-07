@@ -22,7 +22,7 @@ class Collider{
     public:
     static std::string parseAll(void);
     static void Initialize(void);
-    static bool Collision();
+    static void Collision();
     static void setDirectionAt(float x, float y,int i);
     static void setRandomDirectionAt(int i);
     
